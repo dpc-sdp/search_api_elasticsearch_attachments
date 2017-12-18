@@ -31,4 +31,19 @@ use Drupal\Core\TypedData\ComplexDataInterface;
 
 class ElasticsearchAttachments extends ProcessorPluginBase implements PluginFormInterface {
 
+  protected $targetFieldPrefix = 'esa_';
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPropertyDefinitions(DatasourceInterface $datasource = NULL) {
+
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function addFieldValues(ItemInterface $item) {
+
+  }
 }

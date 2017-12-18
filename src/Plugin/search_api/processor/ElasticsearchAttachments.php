@@ -23,6 +23,8 @@ use Drupal\Core\TypedData\ComplexDataInterface;
  *   description = @Translation("Adds the Elasticsearch attachments content to the indexed data."),
  *   stages = {
  *     "add_properties" = 0,
+ *     "pre_index_save" = 0,
+ *     "preprocess_index" = -20,
  *   },
  *   locked = false,
  *   hidden = false,
@@ -31,7 +33,7 @@ use Drupal\Core\TypedData\ComplexDataInterface;
 
 class ElasticsearchAttachments extends ProcessorPluginBase implements PluginFormInterface {
 
-  protected $targetFieldPrefix = 'esa_';
+  protected $targetFieldPrefix = 'es_attachment';
 
   /**
    * {@inheritdoc}
@@ -44,6 +46,22 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * {@inheritdoc}
    */
   public function addFieldValues(ItemInterface $item) {
+    // TODO We are only working with files for now.
+    if ($item->getDatasource()->getEntityTypeId() == 'file') {
+      $bundle_type = $item->getDatasource()->getItemBundle($item->getOriginalObject());
+    }
 
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function preIndexSave() {
+    // Automatically add field to index if processor is enabled.
+    $field = $this->ensureField(NULL, $this->targetFieldId, 'string');
+
+    // Hide the field.
+    $field->setHidden();
+  }
+
 }

@@ -43,7 +43,8 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
   use PluginFormTrait;
 
-  protected $targetFieldPrefix = 'es_attachment';
+  protected $targetFieldId = 'es_attachment';
+  protected $targetFieldType = 'string';
 
   /**
    * The mime type guesser service.
@@ -132,18 +133,36 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * {@inheritdoc}
    */
   public function getPropertyDefinitions(DatasourceInterface $datasource = NULL) {
+    $properties = [];
+    if (!$datasource) {
+      $definition = [
+        // TODO Come up with better label.
+        'label' => $this->t('Search API Elasticsearch attachments'),
+        // TODO Come up with better description.
+        'description' => $this->t('Search API Elasticsearch attachments.'),
+        'type' => $this->targetFieldType,
+        'processor_id' => $this->getPluginId(),
+        // This will be a hidden field,
+        // not something a user can add/remove manually.
+        //'hidden' => TRUE,
+      ];
 
+      $properties[$this->targetFieldId] = new ProcessorProperty($definition);
+    }
+
+    return $properties;
   }
 
   /**
    * {@inheritdoc}
    */
   public function addFieldValues(ItemInterface $item) {
+    ksm($item);
     // TODO We are only working with files for now.
-    if ($item->getDatasource()->getEntityTypeId() == 'file') {
-      $bundle_type = $item->getDatasource()->getItemBundle($item->getOriginalObject());
-      ksm($bundle_type);
-    }
+//    if ($item->getDatasource()->getEntityTypeId() == 'file') {
+//      $bundle_type = $item->getDatasource()->getItemBundle($item->getOriginalObject());
+//      ksm($bundle_type);
+//    }
 
   }
 
@@ -152,10 +171,10 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    */
   public function preIndexSave() {
     // Automatically add field to index if processor is enabled.
-    $field = $this->ensureField(NULL, $this->targetFieldId, 'string');
+    $field = $this->ensureField(NULL, $this->targetFieldId, $this->targetFieldType);
 
     // Hide the field.
-    $field->setHidden();
+    //$field->setHidden();
   }
 
   /**
@@ -255,6 +274,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
   /**
    * Default excluded extensions.
+   * see: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n484
    *
    * @return string
    *   string of file extensions separated by a space.
@@ -267,6 +287,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * Get a corresponding array of excluded mime types.
    *
    * Obtained from a space separated string of file extensions.
+   * see: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n501
    *
    * @param string $extensions
    *   If it's not null, the return will correspond to the extensions.

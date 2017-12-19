@@ -157,12 +157,36 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * {@inheritdoc}
    */
   public function addFieldValues(ItemInterface $item) {
-    ksm($item);
-    // TODO We are only working with files for now.
-//    if ($item->getDatasource()->getEntityTypeId() == 'file') {
-//      $bundle_type = $item->getDatasource()->getItemBundle($item->getOriginalObject());
-//      ksm($bundle_type);
-//    }
+
+    // TODO We are only working with media files for now.
+    // TODO Look to extending this to auto add files from all entities.
+    if ($item->getDatasource()->getEntityTypeId() == 'file') {
+      // Get all fields for this item.
+      $itemFields = $item->getFields();
+
+      // Get File.
+      $file = $item->getOriginalObject()->getValue();
+//      $fileUri = $file->getFileUri();
+//      $fileName = $file->getFilename();
+//      kint($file);
+//      kint($fileUri);
+//      kint($fileName);
+
+      // Check if we can we index this file.
+      if ($this->isFileIndexable($file)) {
+        // Extract the file data, either from cache or from source.
+        $extraction = $this->extractOrGetFromCache($file);
+
+        // Get target field.
+        $targetField = $itemFields[$this->targetFieldId];
+
+        // Add the extracted value.
+        $targetField->addValue($extraction);
+      }
+
+      //$file_field = $item->getOriginalObject()->getValue()->getFieldDefinition('field_media_file');
+      //die();
+    }
 
   }
 
@@ -182,16 +206,16 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     if (isset($this->configuration['excluded_extensions'])) {
-      $default_excluded_extensions = $this->configuration['excluded_extensions'];
+      $defaultExcludedExtensions = $this->configuration['excluded_extensions'];
     }
     else {
-      $default_excluded_extensions = $this->defaultExcludedExtensions();
+      $defaultExcludedExtensions = $this->defaultExcludedExtensions();
     }
 
     $form['excluded_extensions'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Excluded file extensions'),
-      '#default_value' => $default_excluded_extensions,
+      '#default_value' => $defaultExcludedExtensions,
       '#size' => 80,
       '#maxlength' => 255,
       '#description' => $this->t('File extensions that are excluded from indexing. Separate extensions with a space and do not include the leading dot.<br />Example: "aif art avi bmp gif ico mov oga ogv png psd ra ram rgb flv"<br />Extensions are internally mapped to a MIME type, so it is not necessary to put variations that map to the same type (e.g. tif is sufficient for tif and tiff)'),
@@ -264,12 +288,12 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * @see \Drupal\Core\Plugin\PluginFormInterface::submitConfigurationForm()
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
-    $excluded_extensions = $form_state->getValue('excluded_extensions');
-    $excluded_extensions_array = explode(' ', $excluded_extensions);
-    $excluded_mimes_array = $this->getExcludedMimes($excluded_extensions_array);
-    $excluded_mimes_string = implode(' ', $excluded_mimes_array);
+    $excludedExtensions = $form_state->getValue('excluded_extensions');
+    $excludedExtensionsArray = explode(' ', $excludedExtensions);
+    $excludedMimesArray = $this->getExcludedMimes($excludedExtensionsArray);
+    $excludedMimesString = implode(' ', $excludedMimesArray);
 
-    $this->setConfiguration($form_state->getValues() + ['excluded_mimes' => $excluded_mimes_string]);
+    $this->setConfiguration($form_state->getValues() + ['excluded_mimes' => $excludedMimesString]);
   }
 
   /**
@@ -299,21 +323,124 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    */
   public function getExcludedMimes($extensions = NULL) {
     if (!$extensions && isset($this->configuration['excluded_mimes'])) {
-      $excluded_mimes_string = $this->configuration['excluded_mimes'];
-      $excluded_mimes = explode(' ', $excluded_mimes_string);
+      $excludedMimesString = $this->configuration['excluded_mimes'];
+      $excludedMimes = explode(' ', $excludedMimesString);
     }
     else {
       if (!$extensions) {
         $extensions = explode(' ', $this->defaultExcludedExtensions());
       }
-      $excluded_mimes = [];
+      $excludedMimes = [];
       foreach ($extensions as $extension) {
-        $excluded_mimes[] = $this->mimeTypeGuesser->guess('dummy.' . $extension);
+        $excludedMimes[] = $this->mimeTypeGuesser->guess('dummy.' . $extension);
       }
     }
     // Ensure we get an array of unique mime values because many extension can
     // map the the same mime type.
-    $excluded_mimes = array_combine($excluded_mimes, $excluded_mimes);
-    return array_keys($excluded_mimes);
+    $excludedMimes = array_combine($excludedMimes, $excludedMimes);
+    return array_keys($excludedMimes);
+  }
+
+  /**
+   * Exclude private files from being indexed.
+   *
+   * Only happens if the module is configured to do so(default behaviour).
+   *
+   * @param object $file
+   *   File object.
+   *
+   * @return bool
+   *   TRUE if we should prevent current file from being indexed.
+   */
+  public function isPrivateFileAllowed($file) {
+    // Know if private files are allowed to be indexed.
+    $privateAllowed = FALSE;
+    if (isset($this->configuration['excluded_private'])) {
+      $privateAllowed = !(bool)$this->configuration['excluded_private'];
+    }
+    // Know if current file is private.
+    $uri = $file->getFileUri();
+    $fileIsPrivate = FALSE;
+    if (substr($uri, 0, 10) == 'private://') {
+      $fileIsPrivate = TRUE;
+    }
+
+    if (!$fileIsPrivate) {
+      return TRUE;
+    }
+    else {
+      return $privateAllowed;
+    }
+  }
+
+
+  /**
+   * Check if the file is allowed to be indexed.
+   *
+   * @param object $file
+   *   A file object.
+   * @param \Drupal\search_api\Item\ItemInterface $item
+   *   The item the file was referenced in.
+   * @param string|null $field_name
+   *   The name of the field the file was referenced in, if applicable.
+   *
+   * @return bool
+   *   TRUE or FALSE
+   */
+  public function isFileIndexable($file) {
+    // File should exist in disc.
+    $indexable = file_exists($file->getFileUri());
+    if (!$indexable) {
+      return FALSE;
+    }
+
+    // File should have a mime type that is allowed.
+    $indexable = $indexable && !in_array($file->getMimeType(), $this->getExcludedMimes());
+    if (!$indexable) {
+      return FALSE;
+    }
+
+    // File permanent.
+    $indexable = $indexable && $file->isPermanent();
+    if (!$indexable) {
+      return FALSE;
+    }
+    // File shouldn't exceed configured file size.
+//    $indexable = $indexable && $this->isFileSizeAllowed($file);
+//    if (!$indexable) {
+//      return FALSE;
+//    }
+
+    // Whether a private file can be indexed or not.
+    $indexable = $indexable && $this->isPrivateFileAllowed($file);
+    if (!$indexable) {
+      return FALSE;
+    }
+
+    return $indexable;
+  }
+
+  /**
+   * Extract file data or get it from cache if available and cache it.
+   *
+   * @return string
+   *   $extracted_data
+   */
+  public function extractOrGetFromCache($file) {
+    $collection = 'search_api_elasticsearch_attachments';
+    $key = $collection . ':' . $file->id();
+    if ($cache = $this->keyValue->get($collection)->get($key)) {
+      $extractedData = $cache;
+    }
+    else {
+      $extractedData = $this->extract($file);
+      $this->keyValue->get($collection)->set($key, $extractedData);
+    }
+    return $extractedData;
+  }
+
+
+  private function extract($file) {
+    return "UWJveCBlbmFibGVzIGxhdW5jaGluZyBzdXBwb3J0ZWQsIGZ1bGx5LW1hbmFnZWQsIFJFU1RmdWwgRWxhc3RpY3NlYXJjaCBTZXJ2aWNlIGluc3RhbnRseS4g";
   }
 }

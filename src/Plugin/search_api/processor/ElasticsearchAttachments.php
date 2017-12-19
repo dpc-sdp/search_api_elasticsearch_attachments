@@ -428,23 +428,75 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * Extract file data or get it from cache if available and cache it.
    *
    * @return string
-   *   $extracted_data
+   *   $extractedData
    */
   public function extractOrGetFromCache($file) {
     $collection = 'search_api_elasticsearch_attachments';
     $key = $collection . ':' . $file->id();
+
+    // Check Cache.
     if ($cache = $this->keyValue->get($collection)->get($key)) {
+      // Return Cache.
       $extractedData = $cache;
     }
     else {
+      // Extract.
       $extractedData = $this->extract($file);
+      // Set cache.
       $this->keyValue->get($collection)->set($key, $extractedData);
     }
+
     return $extractedData;
   }
-  
+
+  /**
+   * Extract file data and encode it.
+   *
+   * @param $file
+   * @return string
+   */
   private function extract($file) {
-    return "UWJveCBlbmFibGVzIGxhdW5jaGluZyBzdXBwb3J0ZWQsIGZ1bGx5LW1hbmFnZWQsIFJFU1RmdWwgRWxhc3RpY3NlYXJjaCBTZXJ2aWNlIGluc3RhbnRseS4g";
+    $path = $file->getFileUri();
+    // If path is not set, do nothing.
+    if(!isset($path) && empty($path)){
+      // TODO Handle this exception better.
+      return '';
+    }
+
+    // Load and Encode the file contents.
+    $data = file_get_contents($path);
+    $base64 = base64_encode($data);
+
+    // Return the base64 encoded file.
+    // TODO Check performance impact with larger files.
+    return $base64;
   }
+
+  /**
+   * Exclude files that exceed configured max size.
+   *
+   * @param object $file
+   *   File object.
+   *
+   * @return bool
+   *   TRUE if the file size does not exceed configured max size.
+   */
+  public function isFileSizeAllowed($file) {
+    if (isset($this->configuration['max_filesize'])) {
+      $configuredSize = $this->configuration['max_filesize'];
+      if ($configuredSize == '0') {
+        return TRUE;
+      }
+      else {
+        $fileSizeBytes = $file->getSize();
+        $configuredSizeBytes = Bytes::toInt($configuredSize);
+        if ($fileSizeBytes > $configuredSizeBytes) {
+          return FALSE;
+        }
+      }
+    }
+
+    return TRUE;
+  }  
   
 }

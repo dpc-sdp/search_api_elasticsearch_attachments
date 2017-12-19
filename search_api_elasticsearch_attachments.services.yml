@@ -1,0 +1,5 @@
+services:
+  search_api_elasticsearch_attachments.prepare_index:
+    class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\PrepareIndex
+    tags:
+      - { name: event_subscriber }

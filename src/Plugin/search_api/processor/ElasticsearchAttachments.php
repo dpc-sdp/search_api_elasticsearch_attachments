@@ -44,7 +44,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   use PluginFormTrait;
 
   protected $targetFieldId = 'es_attachment';
-  protected $targetFieldType = 'string';
+  protected $targetFieldType = 'attachment';
 
   /**
    * The mime type guesser service.

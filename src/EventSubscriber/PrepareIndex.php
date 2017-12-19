@@ -26,9 +26,9 @@ class PrepareIndex implements EventSubscriberInterface {
    */
   public function prepareIndex(PrepareIndexEvent $event) {
     $indexConfig = $event->getIndexConfig();
-ksm($indexConfig);
+//ksm($indexConfig);
     //$indexConfig['body']['settings']['analysis'] = [];
-
+    //$indexConfig['pipeline'] = 'attachment';
     //$event->setIndexConfig($indexConfig);
   }
 

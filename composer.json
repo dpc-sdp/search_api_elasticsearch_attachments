@@ -4,7 +4,7 @@
   "type": "drupal-module",
   "minimum-stability": "dev",
   "require": {
-    "drupal/elasticsearch_connector": "5.0@alpha"
+    "drupal/elasticsearch_connector": "5.0-alpha1"
   },
   "extra": {
     "patches": {

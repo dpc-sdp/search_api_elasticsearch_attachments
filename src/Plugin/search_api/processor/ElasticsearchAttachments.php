@@ -220,22 +220,25 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       '#maxlength' => 255,
       '#description' => $this->t('File extensions that are excluded from indexing. Separate extensions with a space and do not include the leading dot.<br />Example: "aif art avi bmp gif ico mov oga ogv png psd ra ram rgb flv"<br />Extensions are internally mapped to a MIME type, so it is not necessary to put variations that map to the same type (e.g. tif is sufficient for tif and tiff)'),
     ];
-//    $form['number_indexed'] = [
-//        '#type' => 'number',
-//        '#title' => $this->t('Number of files indexed per file field'),
-//        '#default_value' => isset($this->configuration['number_indexed']) ? $this->configuration['number_indexed'] : '0',
-//        '#size' => 5,
-//        '#min' => 0,
-//        '#max' => 99999,
-//        '#description' => $this->t('The number of files to index per file field.<br />The order of indexation is the weight in the widget.<br /> 0 for no restriction.'),
-//    ];
-//    $form['max_filesize'] = [
-//        '#type' => 'textfield',
-//        '#title' => $this->t('Maximum upload size'),
-//        '#default_value' => isset($this->configuration['max_filesize']) ? $this->configuration['max_filesize'] : '0',
-//        '#description' => $this->t('Enter a value like "10 KB", "10 MB" or "10 GB" in order to restrict the max file size of files that should be indexed.<br /> Enter "0" for no limit restriction.'),
-//        '#size' => 10,
-//    ];
+
+    $form['number_indexed'] = [
+      '#type' => 'number',
+      '#title' => $this->t('Number of files indexed per file field'),
+      '#default_value' => isset($this->configuration['number_indexed']) ? $this->configuration['number_indexed'] : '0',
+      '#size' => 5,
+      '#min' => 0,
+      '#max' => 99999,
+      '#description' => $this->t('The number of files to index per file field.<br />The order of indexation is the weight in the widget.<br /> 0 for no restriction.'),
+    ];
+
+    $form['max_filesize'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Maximum upload size'),
+      '#default_value' => isset($this->configuration['max_filesize']) ? $this->configuration['max_filesize'] : '0',
+      '#description' => $this->t('Enter a value like "10 KB", "10 MB" or "10 GB" in order to restrict the max file size of files that should be indexed.<br /> Enter "0" for no limit restriction.'),
+      '#size' => 10,
+    ];
+
     $form['excluded_private'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Exclude private files'),
@@ -259,21 +262,21 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * @see \Drupal\Core\Plugin\PluginFormInterface::validateConfigurationForm()
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state) {
-//    $max_filesize = trim($form_state->getValue('max_filesize'));
-//    if ($max_filesize != '0') {
-//      $size_info = explode(' ', $max_filesize);
-//      if (count($size_info) != 2) {
-//        $error = TRUE;
-//      }
-//      else {
-//        $starts_integer = is_int((int) $size_info[0]);
-//        $unit_expected = in_array($size_info[1], ['KB', 'MB', 'GB']);
-//        $error = !$starts_integer || !$unit_expected;
-//      }
-//      if ($error) {
-//        $form_state->setErrorByName('max_filesize', $this->t('The max filesize option must contain a valid value. You may either enter "0" (for no restriction) or a string like "10 KB, "10 MB" or "10 GB".'));
-//      }
-//    }
+    $maxFilesize = trim($form_state->getValue('max_filesize'));
+    if ($maxFilesize != '0') {
+      $sizeInfo = explode(' ', $maxFilesize);
+      if (count($sizeInfo) != 2) {
+        $error = TRUE;
+      }
+      else {
+        $startsInteger = is_int((int) $sizeInfo[0]);
+        $unitExpected = in_array($sizeInfo[1], ['KB', 'MB', 'GB']);
+        $error = !$startsInteger || !$unitExpected;
+      }
+      if ($error) {
+        $form_state->setErrorByName('max_filesize', $this->t('The max filesize option must contain a valid value. You may either enter "0" (for no restriction) or a string like "10 KB, "10 MB" or "10 GB".'));
+      }
+    }
   }
 
   /**
@@ -405,11 +408,12 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     if (!$indexable) {
       return FALSE;
     }
+    
     // File shouldn't exceed configured file size.
-//    $indexable = $indexable && $this->isFileSizeAllowed($file);
-//    if (!$indexable) {
-//      return FALSE;
-//    }
+    $indexable = $indexable && $this->isFileSizeAllowed($file);
+    if (!$indexable) {
+      return FALSE;
+    }
 
     // Whether a private file can be indexed or not.
     $indexable = $indexable && $this->isPrivateFileAllowed($file);
@@ -438,9 +442,9 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     }
     return $extractedData;
   }
-
-
+  
   private function extract($file) {
     return "UWJveCBlbmFibGVzIGxhdW5jaGluZyBzdXBwb3J0ZWQsIGZ1bGx5LW1hbmFnZWQsIFJFU1RmdWwgRWxhc3RpY3NlYXJjaCBTZXJ2aWNlIGluc3RhbnRseS4g";
   }
+  
 }

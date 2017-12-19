@@ -1,0 +1,17 @@
+{
+  "name": "drupal/search_api_elasticsearch_attachments",
+  "description": "Search API Elasticsearch Attachments",
+  "type": "drupal-module",
+  "minimum-stability": "dev",
+  "require": {
+    "drupal/elasticsearch_connector": "5.0@alpha"
+  },
+  "extra": {
+    "patches": {
+      "drupal/elasticsearch_connector":{
+        "Issue #2930819, Issue #2927465, Issue #2926853":
+        "https://patch-diff.githubusercontent.com/raw/dakkusingh/elasticsearch_connector/pull/1.diff"
+      }
+    }
+  }
+}

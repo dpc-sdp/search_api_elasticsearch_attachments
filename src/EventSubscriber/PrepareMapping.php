@@ -31,12 +31,11 @@ class PrepareMapping implements EventSubscriberInterface {
       $mappingConfig['fields'] = [
         "content" => [
           "store" => TRUE,
+          "term_vector" => "with_positions_offsets",
         ]
       ];
-      //$event->setMappingConfig($mappingConfig);
+      $event->setMappingConfig($mappingConfig);
     }
-
-
   }
 
 }

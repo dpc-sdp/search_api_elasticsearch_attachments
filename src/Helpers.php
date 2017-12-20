@@ -6,9 +6,9 @@ namespace Drupal\search_api_elasticsearch_attachments;
  * {@inheritdoc}
  */
 class Helpers {
-  /*
-   * Provides the Search API Index name
-   *
+
+  /**
+   * Provides the Search API Index name.
    */
   public static function getIndexName($indexName) {
     // See IndexFactory:getIndexName()

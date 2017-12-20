@@ -5,7 +5,6 @@ namespace Drupal\search_api_elasticsearch_attachments\EventSubscriber;
 use Drupal\elasticsearch_connector\Event\PrepareIndexEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-
 /**
  * {@inheritdoc}
  */

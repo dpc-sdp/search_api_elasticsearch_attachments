@@ -33,7 +33,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   hidden = false,
  * )
  */
-
 class ElasticsearchAttachments extends ProcessorPluginBase implements PluginFormInterface {
 
   use PluginFormTrait;
@@ -287,7 +286,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
   /**
    * Default excluded extensions.
-   * see: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n484
+   * see: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n484.
    *
    * @return string
    *   string of file extensions separated by a space.
@@ -393,7 +392,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     if (!$indexable) {
       return FALSE;
     }
-    
+
     // File shouldn't exceed configured file size.
     $indexable = $indexable && $this->isFileSizeAllowed($file);
     if (!$indexable) {
@@ -438,12 +437,13 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    * Extract file data and encode it.
    *
    * @param $file
+   *
    * @return string
    */
   private function extract($file) {
     $path = $file->getFileUri();
     // If path is not set, do nothing.
-    if(!isset($path) && empty($path)){
+    if (!isset($path) && empty($path)) {
       // TODO Handle this exception better.
       return '';
     }
@@ -482,6 +482,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     }
 
     return TRUE;
-  }  
-  
+  }
+
 }

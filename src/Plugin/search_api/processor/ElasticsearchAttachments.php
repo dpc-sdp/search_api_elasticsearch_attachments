@@ -139,7 +139,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
         'processor_id' => $this->getPluginId(),
         // This will be a hidden field,
         // not something a user can add/remove manually.
-        //'hidden' => TRUE,
+        'hidden' => TRUE,
       ];
 
       $properties[$this->targetFieldId] = new ProcessorProperty($definition);

@@ -9,7 +9,6 @@ use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
 use Drupal\search_api\Query\ResultSetInterface;
 
-
 /**
  * Adds a highlighted excerpt to results and highlights returned fields.
  *

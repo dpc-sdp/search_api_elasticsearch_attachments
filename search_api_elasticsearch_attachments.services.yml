@@ -11,3 +11,7 @@ services:
     class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\PrepareMapping
     tags:
       - { name: event_subscriber }
+  search_api_elasticsearch_attachments.build_query:
+    class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\BuildQuery
+    tags:
+      - { name: event_subscriber }

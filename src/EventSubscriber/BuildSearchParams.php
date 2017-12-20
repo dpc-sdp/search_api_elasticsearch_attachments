@@ -26,6 +26,7 @@ class BuildSearchParams implements EventSubscriberInterface {
    */
   public function buildSearchParams(BuildSearchParamsEvent $event) {
     $params = $event->getElasticSearchParams();
+    // See: https://github.com/elastic/elasticsearch-php/issues/394
     $params['body']['highlight']['fields']['es_attachment.content'] = (object)[];
     $event->setElasticSearchParams($params);
   }

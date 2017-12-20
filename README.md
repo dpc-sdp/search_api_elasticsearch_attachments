@@ -30,13 +30,10 @@ composer require drupal/search_api_elasticsearch_attachments
 This will auto install the *search_api_elasticsearch_attachments* module and also install the *elasticsearch_connector* module
 
 There are a number of patches required to elasticsearch_connector module. These are applied automatically by composer. Sit back and let composer do the hard work for you. Patches that will get auto applied by composer:
-* Issue #2926853, by dakku: Allow hook for altering getSearchQueryOptions
+* Issue #2926853 by dakku: Allow hook for altering getSearchQueryOptions
 * Issue #2927465 by dakku: Allow option for altering IndexFactory Settings & Options
 * Issue #2930819 by dakku: Allow option for altering MappingFactory Options
 
 ## Elasticsearch Attachments Configuration
-### Enable the Elasticsearch Attachments Processor
+### Enable and Configure the Elasticsearch Attachments Processor
 ![Enable the Processor](https://www.drupal.org/files/Screen_Shot_2017-12-19_at_11_39_06_pm.jpg)
-
-### Configure the Elasticsearch Attachments Processor Options
-![Configure the Options](https://www.drupal.org/files/Screen_Shot_2017-12-19_at_11_39_32_pm.jpg)

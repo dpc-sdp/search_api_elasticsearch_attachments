@@ -8,12 +8,7 @@ use Drupal\search_api\Processor\ProcessorPluginBase;
 use Drupal\search_api\Processor\ProcessorProperty;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\search_api\IndexInterface;
 use Drupal\search_api\Plugin\PluginFormTrait;
-use Drupal\Component\Utility\Html;
-use Drupal\node\NodeInterface;
-use Drupal\Core\TypedData\ComplexDataInterface;
-
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -158,7 +153,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    */
   public function addFieldValues(ItemInterface $item) {
 
-    // TODO We are only working with media files for now.
+    // TODO We are only working with files for now.
     // TODO Look to extending this to auto add files from all entities.
     if ($item->getDatasource()->getEntityTypeId() == 'file') {
       // Get all fields for this item.
@@ -166,11 +161,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
       // Get File.
       $file = $item->getOriginalObject()->getValue();
-//      $fileUri = $file->getFileUri();
-//      $fileName = $file->getFilename();
-//      kint($file);
-//      kint($fileUri);
-//      kint($fileName);
 
       // Check if we can we index this file.
       if ($this->isFileIndexable($file)) {
@@ -183,9 +173,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
         // Add the extracted value.
         $targetField->addValue($extraction);
       }
-
-      //$file_field = $item->getOriginalObject()->getValue()->getFieldDefinition('field_media_file');
-      //die();
     }
 
   }
@@ -198,7 +185,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     $field = $this->ensureField(NULL, $this->targetFieldId, $this->targetFieldType);
 
     // Hide the field.
-    //$field->setHidden();
+    $field->setHidden();
   }
 
   /**
@@ -248,7 +235,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
     return $form;
   }
-
 
   /**
    * Form validation handler.
@@ -375,7 +361,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       return $privateAllowed;
     }
   }
-
 
   /**
    * Check if the file is allowed to be indexed.

@@ -11,10 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
-use Drupal\search_api\Utility\FieldsHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -55,32 +52,11 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   protected $configFactory;
 
   /**
-   * Entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * Key value service.
    *
    * @var \Drupal\Core\KeyValueStore\KeyValueFactoryInterface
    */
   protected $keyValue;
-
-  /**
-   * Module handler service.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
-
-  /**
-   * Search API field helper.
-   *
-   * @var \Drupal\search_api\Utility\FieldsHelperInterface
-   */
-  protected $fieldHelper;
 
   /**
    * {@inheritdoc}
@@ -90,18 +66,12 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
                               array $plugin_definition,
                               MimeTypeGuesserInterface $mime_type_guesser,
                               ConfigFactoryInterface $config_factory,
-                              EntityTypeManagerInterface $entity_type_manager,
-                              KeyValueFactoryInterface $key_value,
-                              ModuleHandlerInterface $module_handler,
-                              FieldsHelperInterface $field_helper) {
+                              KeyValueFactoryInterface $key_value) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->mimeTypeGuesser = $mime_type_guesser;
     $this->configFactory = $config_factory;
-    $this->entityTypeManager = $entity_type_manager;
     $this->keyValue = $key_value;
-    $this->moduleHandler = $module_handler;
-    $this->fieldHelper = $field_helper;
   }
 
   /**
@@ -116,11 +86,8 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
                       $plugin_definition,
                       $container->get('file.mime_type.guesser'),
                       $container->get('config.factory'),
-                      $container->get('entity_type.manager'),
-                      $container->get('keyvalue'),
-                      $container->get('module_handler'),
-                      $container->get('search_api.fields_helper')
-                    );
+                      $container->get('keyvalue')
+                     );
   }
 
   /**

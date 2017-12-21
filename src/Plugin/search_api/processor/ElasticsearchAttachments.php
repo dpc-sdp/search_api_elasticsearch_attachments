@@ -16,6 +16,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\search_api\Utility\FieldsHelperInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\Crypt;
 
 /**
  * Provides file fields processor for Elasticsearch Attachments.
@@ -436,7 +437,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
     // Load and Encode the file contents.
     $data = file_get_contents($path);
-    $base64 = base64_encode($data);
+    $base64 = Crypt::hashBase64($data);
 
     // Return the base64 encoded file.
     // TODO Check performance impact with larger files.

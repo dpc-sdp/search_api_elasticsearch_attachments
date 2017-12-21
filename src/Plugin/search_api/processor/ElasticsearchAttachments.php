@@ -207,16 +207,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       '#description' => $this->t('File extensions that are excluded from indexing. Separate extensions with a space and do not include the leading dot.<br />Example: "aif art avi bmp gif ico mov oga ogv png psd ra ram rgb flv"<br />Extensions are internally mapped to a MIME type, so it is not necessary to put variations that map to the same type (e.g. tif is sufficient for tif and tiff)'),
     ];
 
-    $form['number_indexed'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Number of files indexed per file field'),
-      '#default_value' => isset($this->configuration['number_indexed']) ? $this->configuration['number_indexed'] : '0',
-      '#size' => 5,
-      '#min' => 0,
-      '#max' => 99999,
-      '#description' => $this->t('The number of files to index per file field.<br />The order of indexation is the weight in the widget.<br /> 0 for no restriction.'),
-    ];
-
     $form['max_filesize'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Maximum upload size'),
@@ -366,10 +356,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    *
    * @param object $file
    *   A file object.
-   * @param \Drupal\search_api\Item\ItemInterface $item
-   *   The item the file was referenced in.
-   * @param string|null $field_name
-   *   The name of the field the file was referenced in, if applicable.
    *
    * @return bool
    *   TRUE or FALSE

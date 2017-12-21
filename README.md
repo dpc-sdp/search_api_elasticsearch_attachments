@@ -33,7 +33,8 @@ There are a number of patches required to elasticsearch_connector module. These 
 * Issue #2926853 by dakku: Allow hook for altering getSearchQueryOptions
 * Issue #2927465 by dakku: Allow option for altering IndexFactory Settings & Options
 * Issue #2930819 by dakku: Allow option for altering MappingFactory Options
-* Issue #2932003: Allow option for altering SearchBuilder:build $params
+* Issue #2932003 by dakku: Allow option for altering SearchBuilder:build $params
+* Issue #2932301 by dakku: Allow option for altering IndexFactory:mapping $params
 
 ## Elasticsearch Attachments Configuration
 ### Enable and Configure the Elasticsearch Attachments Processor

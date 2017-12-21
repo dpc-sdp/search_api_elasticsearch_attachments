@@ -16,7 +16,7 @@ class BuildSearchParams implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[BuildSearchParamsEvent::BUILD_QUERY] = 'buildSearchParams';
+    $events[BuildSearchParamsEvent::BUILD_QUERY] = 'searchParams';
     return $events;
   }
 
@@ -26,7 +26,7 @@ class BuildSearchParams implements EventSubscriberInterface {
    * @param \Drupal\elasticsearch_connector\Event\BuildSearchParamsEvent $event
    *   The BuildSearchParamsEvent event.
    */
-  public function buildSearchParams(BuildSearchParamsEvent $event) {
+  public function searchParams(BuildSearchParamsEvent $event) {
     $params = $event->getElasticSearchParams();
 
     // Default Prefix and Suffix.

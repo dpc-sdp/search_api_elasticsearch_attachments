@@ -14,7 +14,7 @@ class PrepareMapping implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[PrepareMappingEvent::PREPARE_MAPPING] = 'prepareMapping';
+    $events[PrepareMappingEvent::PREPARE_MAPPING] = 'mapping';
     return $events;
   }
 
@@ -24,7 +24,7 @@ class PrepareMapping implements EventSubscriberInterface {
    * @param \Drupal\elasticsearch_connector\Event\PrepareMappingEvent $event
    *   The PrepareMappingEvent event.
    */
-  public function prepareMapping(PrepareMappingEvent $event) {
+  public function mapping(PrepareMappingEvent $event) {
     $mappingConfig = $event->getMappingConfig();
     $type = $event->getMappingType();
     if ($type == 'attachment') {

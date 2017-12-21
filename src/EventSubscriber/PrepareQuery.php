@@ -14,7 +14,7 @@ class PrepareQuery implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[PrepareSearchQueryEvent::PREPARE_QUERY] = 'prepareQuery';
+    $events[PrepareSearchQueryEvent::PREPARE_QUERY] = 'query';
     return $events;
   }
 
@@ -24,7 +24,7 @@ class PrepareQuery implements EventSubscriberInterface {
    * @param \Drupal\elasticsearch_connector\Event\PrepareSearchQueryEvent $event
    *   The PrepareSearchQueryEvent event.
    */
-  public function prepareQuery(PrepareSearchQueryEvent $event) {
+  public function query(PrepareSearchQueryEvent $event) {
     $elasticSearchQuery = $event->getElasticSearchQuery();
     $elasticSearchQuery['query_search_string']['query_string']['fields'][] = 'es_attachment.content';
     $event->setElasticSearchQuery($elasticSearchQuery);

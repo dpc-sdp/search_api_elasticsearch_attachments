@@ -14,7 +14,7 @@ class PrepareIndex implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   public static function getSubscribedEvents() {
-    $events[PrepareIndexEvent::PREPARE_INDEX] = 'prepareIndex';
+    $events[PrepareIndexEvent::PREPARE_INDEX] = 'index';
     return $events;
   }
 
@@ -24,7 +24,7 @@ class PrepareIndex implements EventSubscriberInterface {
    * @param \Drupal\elasticsearch_connector\Event\PrepareIndexEvent $event
    *   The PrepareIndexEvent event.
    */
-  public function prepareIndex(PrepareIndexEvent $event) {
+  public function index(PrepareIndexEvent $event) {
   }
 
 }

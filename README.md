@@ -10,7 +10,7 @@ This module allows Drupal to index files (attachments) to Elasticsearch by makin
 This module requires:
 * Drupal 8
 * Search API Module
-* Elasticsearch Connector module (Alpha 1) - _do not use dev_
+* Elasticsearch Connector module (Alpha 2)
 * Elasticsearch Version 5.6
 * Elasticsearch `mapper-attachments` plugin
 
@@ -27,9 +27,12 @@ Thats the hard work done.
 composer require drupal/search_api_elasticsearch_attachments
 ```
 
+## Elasticsearch Connector module (Alpha 1) compatibility.
+Alpha 1 version of Elasticsearch Connector module requires a number of patches. If you are using Alpha 1, please use 8.x-1.0-alpha1 of *search_api_elasticsearch_attachments* module.
+
 This will auto install the *search_api_elasticsearch_attachments* module and also install the *elasticsearch_connector* module
 
-There are a number of patches required to elasticsearch_connector module. These are applied automatically by composer. Sit back and let composer do the hard work for you. Patches that will get auto applied by composer:
+There are a number of patches required to elasticsearch_connector module (Alpha 1 only). These are applied automatically by composer. Sit back and let composer do the hard work for you. Patches that will get auto applied by composer:
 * Issue #2926853 by dakku: Allow hook for altering getSearchQueryOptions
 * Issue #2927465 by dakku: Allow option for altering IndexFactory Settings & Options
 * Issue #2930819 by dakku: Allow option for altering MappingFactory Options

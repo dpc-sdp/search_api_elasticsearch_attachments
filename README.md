@@ -1,4 +1,5 @@
 # Search API Elasticsearch Attachments
+[![CircleCI](https://circleci.com/gh/dakkusingh/search_api_elasticsearch_attachments.svg?style=svg)](https://circleci.com/gh/dakkusingh/search_api_elasticsearch_attachments)
 
 Elasticsearch is generally used to index data of types like string, 
 number, date, etc. 

@@ -243,7 +243,8 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
   /**
    * Default excluded extensions.
-   * see: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n484.
+   *
+   * See: http://cgit.drupalcode.org/search_api_attachments/tree/src/Plugin/search_api/processor/FilesExtrator.php?h=8.x-1.x#n484.
    *
    * @return string
    *   string of file extensions separated by a space.
@@ -301,7 +302,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     // Know if private files are allowed to be indexed.
     $privateAllowed = FALSE;
     if (isset($this->configuration['excluded_private'])) {
-      $privateAllowed = !(bool)$this->configuration['excluded_private'];
+      $privateAllowed = !(bool) $this->configuration['excluded_private'];
     }
     // Know if current file is private.
     $uri = $file->getFileUri();
@@ -389,9 +390,11 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   /**
    * Extract file data and encode it.
    *
-   * @param $file
+   * @param object $file
+   *   File to be indexed.
    *
    * @return string
+   *   base64 encoded file contents.
    */
   private function extract($file) {
     $path = $file->getFileUri();

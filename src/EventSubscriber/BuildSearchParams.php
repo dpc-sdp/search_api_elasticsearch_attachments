@@ -44,7 +44,7 @@ class BuildSearchParams implements EventSubscriberInterface {
     }
 
     // See: https://github.com/elastic/elasticsearch-php/issues/394
-    $params['body']['highlight']['fields']['es_attachment.content'] = (object)[];
+    $params['body']['highlight']['fields']['es_attachment.content'] = (object) [];
     $params['body']['highlight']['pre_tags'] = [$prefix];
     $params['body']['highlight']['post_tags'] = [$suffix];
 

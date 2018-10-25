@@ -14,6 +14,7 @@ class Helpers {
     // See IndexFactory:getIndexName()
     $options = \Drupal::database()->getConnectionOptions();
     $site_database = $options['database'];
+    $site_database = strtolower(preg_replace('/[^A-Za-z0-9_]+/', '', $site_database));
     $sapiIndexName = str_replace('elasticsearch_index_' . $site_database . '_', '', $indexName);
 
     return $sapiIndexName;

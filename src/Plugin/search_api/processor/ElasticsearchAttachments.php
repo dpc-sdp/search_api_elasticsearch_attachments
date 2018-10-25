@@ -2,6 +2,7 @@
 
 namespace Drupal\search_api_elasticsearch_attachments\Plugin\search_api\processor;
 
+use Drupal\file\Entity\File;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Processor\ProcessorPluginBase;
@@ -115,32 +116,53 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   }
 
   /**
+   * Index files.
+   *
+   * Checks whether we can index the file,
+   * and, if so, indexes it.
+   */
+  private function indexFile(ItemInterface $item, File $file) {
+    if ($this->isFileIndexable($file)) {
+      $extraction = $this->extractOrGetFromCache($file);
+      $targetField = $item->getFields()[$this->targetFieldId];
+      $targetField->addValue($extraction);
+    }
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function addFieldValues(ItemInterface $item) {
+    $entity_type = $item->getDatasource()->getEntityTypeId();
+    if ($entity_type == 'file') {
+      $this->indexFile($item, $item->getOriginalObject()->getValue());
+    }
+    elseif ($entity_type == 'node') {
+      // Find all the file fields that were selected for indexing.
+      $indexed_fields = [];
+      foreach ($item->getFields() as $field) {
+        $data_definition = $field->getDataDefinition();
+        if (get_class($data_definition) !== 'Drupal\Core\Field\TypedData\FieldItemDataDefinition') {
+          continue;
+        }
+        if ($data_definition->getFieldDefinition()->getType() !== 'file') {
+          continue;
+        }
+        $indexed_fields[] = $field->getPropertyPath();
+      }
 
-    // TODO We are only working with files for now.
-    // TODO Look to extending this to auto add files from all entities.
-    if ($item->getDatasource()->getEntityTypeId() == 'file') {
-      // Get all fields for this item.
-      $itemFields = $item->getFields();
-
-      // Get File.
-      $file = $item->getOriginalObject()->getValue();
-
-      // Check if we can we index this file.
-      if ($this->isFileIndexable($file)) {
-        // Extract the file data, either from cache or from source.
-        $extraction = $this->extractOrGetFromCache($file);
-
-        // Get target field.
-        $targetField = $itemFields[$this->targetFieldId];
-
-        // Add the extracted value.
-        $targetField->addValue($extraction);
+      // Attempt to index each file in each file field.
+      $node = $item->getOriginalObject()->getValue();
+      foreach ($indexed_fields as $indexed_field) {
+        if (!$node->hasField($indexed_field)) {
+          continue;
+        }
+        $file_field = $node->get($indexed_field);
+        foreach ($file_field as $file_item) {
+          $this->indexFile($item, $file_item->view()['#file']);
+        }
       }
     }
-
   }
 
   /**

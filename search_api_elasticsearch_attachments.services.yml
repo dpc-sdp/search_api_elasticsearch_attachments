@@ -1,10 +1,10 @@
 services:
-  search_api_elasticsearch_attachments.prepare_mapping:
-    class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\PrepareMapping
-    tags:
-      - { name: event_subscriber }
   search_api_elasticsearch_attachments.build_query:
     class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\BuildSearchParams
+    tags:
+      - { name: event_subscriber }
+  search_api_elasticsearch_attachments.build_index_mapping:
+    class: Drupal\search_api_elasticsearch_attachments\EventSubscriber\PrepareIndexMapping
     tags:
       - { name: event_subscriber }
   search_api_elasticsearch_attachments.build_index_params:

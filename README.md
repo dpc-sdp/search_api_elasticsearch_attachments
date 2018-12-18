@@ -16,7 +16,7 @@ This module requires:
 * Drupal 8
 * Search API Module
 * Elasticsearch Connector module (Alpha 1)
-* Elasticsearch Version 5.6
+* Elasticsearch Version 6.2
 * Elasticsearch `ingest-attachment` plugin
 
 ## Elasticsearch Plugin Installation

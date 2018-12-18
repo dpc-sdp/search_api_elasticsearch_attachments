@@ -28,7 +28,7 @@ class BuildSearchParams implements EventSubscriberInterface {
    */
   public function searchParams(BuildSearchParamsEvent $event) {
     $params = $event->getElasticSearchParams();
-    // Seet default boost.
+    // Set default boost.
     $boost = 1.0;
     // We need to get the processor.
     $indexName = Helpers::getIndexName($event->getIndexName());

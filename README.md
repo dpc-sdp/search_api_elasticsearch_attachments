@@ -41,7 +41,7 @@ You have to choose the correct versions of the module depending on your
 Elastic Search Server setup. Please see the table below for
 compatibility.
 
-If you are using Elasticsearch Connector 8.x-6.0-alpha1, 
+If you are using Elasticsearch Connector 8.x-6.0-alpha1 or higher, 
 please use 8.x-6.x-dev of
 *search_api_elasticsearch_attachments* module.
 
@@ -59,7 +59,7 @@ please use 8.x-6.x-dev of
     <td>Mapper Attachments Plugin</td>
   </tr>
   <tr>
-    <td>8.x-5.x (todo)</td>
+    <td>8.x-5.x</td>
     <td>8.x-5.x</td>
     <td>5x</td>
     <td>Ingest Attachment Processor Plugin</td>

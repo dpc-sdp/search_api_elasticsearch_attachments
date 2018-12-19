@@ -4,6 +4,8 @@ namespace Drupal\search_api_elasticsearch_attachments\EventSubscriber;
 
 use Drupal\elasticsearch_connector\Event\PrepareIndexMappingEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Drupal\search_api_elasticsearch_attachments\Helpers;
+use Drupal\search_api\Entity\Index;
 
 /**
  * {@inheritdoc}
@@ -25,11 +27,16 @@ class PrepareIndexMapping implements EventSubscriberInterface {
    *   The PrepareIndexMappingEvent event.
    */
   public function indexMapping(PrepareIndexMappingEvent $event) {
-    $indexMappingParams = $event->getIndexMappingParams();
-    // Exclude our source field from getting saved in ES.
-    // See: https://qbox.io/blog/index-attachments-files-elasticsearch-mapper
-    $indexMappingParams['body'][$indexMappingParams['type']]['_source']['excludes'][] = 'es_attachment';
-    $event->setIndexMappingParams($indexMappingParams);
+    // We need to react only on our processor.
+    $indexName = Helpers::getIndexName($event->getIndexName());
+    $processors = Index::load($indexName)->getProcessors();
+    // Exclude field only if processor is enabled.
+    if (!empty($processors['elasticsearch_attachments'])) {
+      $indexMappingParams = $event->getIndexMappingParams();
+      // Exclude our source encoded data field from getting saved in ES.
+      $indexMappingParams['body'][$indexMappingParams['type']]['_source']['excludes'][] = 'es_attachment.data';
+      $event->setIndexMappingParams($indexMappingParams);
+    }
   }
 
 }

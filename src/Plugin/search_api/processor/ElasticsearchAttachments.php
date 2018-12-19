@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Utility\Bytes;
 
 /**
  * Provides file fields processor for Elasticsearch Attachments.
@@ -35,8 +36,50 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
 
   use PluginFormTrait;
 
+  /**
+   * The target field name.
+   *
+   * @var string
+   */
   protected $targetFieldId = 'es_attachment';
-  protected $targetFieldType = 'attachment';
+
+  /**
+   * The target field type.
+   *
+   * @var string
+   */
+  protected $targetFieldType = 'object';
+
+  /**
+   * List of supported field types.
+   *
+   * @var array
+   */
+  protected static $supportedNodeFieldTypes = [
+    'file',
+    'image',
+  ];
+
+  /**
+   * The available boost factors.
+   *
+   * @var array
+   */
+  protected static $boostFactors = [
+    '0.0' => '0.0',
+    '0.1' => '0.1',
+    '0.2' => '0.2',
+    '0.3' => '0.3',
+    '0.5' => '0.5',
+    '0.8' => '0.8',
+    '1.0' => '1.0',
+    '2.0' => '2.0',
+    '3.0' => '3.0',
+    '5.0' => '5.0',
+    '8.0' => '8.0',
+    '13.0' => '13.0',
+    '21.0' => '21.0',
+  ];
 
   /**
    * The mime type guesser service.
@@ -62,12 +105,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration,
-                              $plugin_id,
-                              array $plugin_definition,
-                              MimeTypeGuesserInterface $mime_type_guesser,
-                              ConfigFactoryInterface $config_factory,
-                              KeyValueFactoryInterface $key_value) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MimeTypeGuesserInterface $mime_type_guesser, ConfigFactoryInterface $config_factory, KeyValueFactoryInterface $key_value) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->mimeTypeGuesser = $mime_type_guesser;
@@ -78,10 +116,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container,
-                                array $configuration,
-                                $plugin_id,
-                                $plugin_definition) {
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static($configuration,
                       $plugin_id,
                       $plugin_definition,
@@ -125,7 +160,11 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     if ($this->isFileIndexable($file)) {
       $extraction = $this->extractOrGetFromCache($file);
       $targetField = $item->getFields()[$this->targetFieldId];
-      $targetField->addValue($extraction);
+      $fileData = [
+        'filename' => $file->get('filename')->value,
+        'data' => $extraction,
+      ];
+      $targetField->addValue($fileData);
     }
   }
 
@@ -134,32 +173,53 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    */
   public function addFieldValues(ItemInterface $item) {
     $entity_type = $item->getDatasource()->getEntityTypeId();
-    if ($entity_type == 'file') {
+    if (in_array($entity_type, static::$supportedNodeFieldTypes)) {
       $this->indexFile($item, $item->getOriginalObject()->getValue());
     }
     elseif ($entity_type == 'node') {
-      // Find all the file fields that were selected for indexing.
-      $indexed_fields = [];
-      foreach ($item->getFields() as $field) {
+      $entity = $item->getOriginalObject()->getValue();
+      foreach ($entity->getFields() as $field) {
         $data_definition = $field->getDataDefinition();
-        if (get_class($data_definition) !== 'Drupal\Core\Field\TypedData\FieldItemDataDefinition') {
+        if (get_class($data_definition) !== 'Drupal\field\Entity\FieldConfig') {
           continue;
         }
-        if ($data_definition->getFieldDefinition()->getType() !== 'file') {
+        $storage = $data_definition->getFieldStorageDefinition();
+        // Check the field for type and process indexation.
+        if (
+          in_array($storage->getType(), static::$supportedNodeFieldTypes)
+          && !empty($files = $field->referencedEntities())
+        ) {
+          foreach ($files as $file) {
+            $this->indexFile($item, $file);
+          }
           continue;
         }
-        $indexed_fields[] = $field->getPropertyPath();
-      }
+        // Check the entity reference fields and extract attachments data.
+        if ($storage instanceof FieldStorageConfigInterface && $storage->getType() !== 'entity_reference') {
+          continue;
+        }
+        if (!isset($storage->getSettings()['target_type']) || $storage->getSettings()['target_type'] !== 'media') {
+          continue;
+        }
 
-      // Attempt to index each file in each file field.
-      $node = $item->getOriginalObject()->getValue();
-      foreach ($indexed_fields as $indexed_field) {
-        if (!$node->hasField($indexed_field)) {
-          continue;
-        }
-        $file_field = $node->get($indexed_field);
-        foreach ($file_field as $file_item) {
-          $this->indexFile($item, $file_item->view()['#file']);
+        if ($field->referencedEntities()) {
+          foreach ($field->referencedEntities() as $field_value) {
+            foreach ($field_value->getFields() as $child_field) {
+              $data_definition = $child_field->getDataDefinition();
+              if (get_class($data_definition) !== 'Drupal\field\Entity\FieldConfig') {
+                continue;
+              }
+              $storage = $data_definition->getFieldStorageDefinition();
+              if (
+                in_array($storage->getType(), static::$supportedNodeFieldTypes)
+                && !empty($files = $child_field->referencedEntities())
+              ) {
+                foreach ($files as $file) {
+                  $this->indexFile($item, $file);
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -171,7 +231,6 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   public function preIndexSave() {
     // Automatically add field to index if processor is enabled.
     $field = $this->ensureField(NULL, $this->targetFieldId, $this->targetFieldType);
-
     // Hide the field.
     $field->setHidden();
   }
@@ -186,6 +245,13 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
     else {
       $defaultExcludedExtensions = $this->defaultExcludedExtensions();
     }
+
+    $form['boost'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default boost for attachments'),
+      '#options' => static::$boostFactors,
+      '#default_value' => sprintf('%.1f', isset($this->configuration['boost']) ? $this->configuration['boost'] : 1.0),
+    ];
 
     $form['excluded_extensions'] = [
       '#type' => 'textfield',
@@ -272,7 +338,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
    *   string of file extensions separated by a space.
    */
   public function defaultExcludedExtensions() {
-    return 'aif art avi bmp gif ico mov oga ogv png psd ra ram rgb flv';
+    return 'aif art avi bmp gif ico mov oga ogv png psd ra ram rgb flv jpg jpeg';
   }
 
   /**
@@ -403,7 +469,8 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       // Extract.
       $extractedData = $this->extract($file);
       // Set cache.
-      $this->keyValue->get($collection)->set($key, $extractedData);
+      // @TODO: Large files cause innodb_log_file_size fatal error.
+      // $this->keyValue->get($collection)->set($key, $extractedData).
     }
 
     return $extractedData;

@@ -118,8 +118,8 @@ class ElasticsearchAttachmentsHighlight extends ProcessorPluginBase implements P
       $itemId = $item['_id'];
       $highlightsString = '';
 
-      if (isset($item['highlight']) && isset($item['highlight']['es_attachment.content'])) {
-        $highlights = $item['highlight']['es_attachment.content'];
+      if (isset($item['highlight']) && isset($item['highlight']['es_attachment.attachment.content'])) {
+        $highlights = $item['highlight']['es_attachment.attachment.content'];
         // There can be multiple highlights.
         foreach ($highlights as $highlight) {
           $highlightsString .= $highlight;

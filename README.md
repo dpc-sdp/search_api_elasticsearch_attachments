@@ -3,6 +3,7 @@
 
 Elasticsearch is generally used to index data of types like string,
 number, date, etc.
+
 However, what if you wanted to index a file like a .pdf or a .doc
 directly and make it searchable?
 
@@ -15,7 +16,7 @@ making use of Elasticsearch data type "attachment".
 This module requires:
 * Drupal 8
 * Search API Module
-* Elasticsearch Connector module (Alpha 1)
+* Elasticsearch Connector module (8.x-6.0-alpha1 or higher)
 * Elasticsearch Version 6.2
 * Elasticsearch `ingest-attachment` plugin
 
@@ -32,22 +33,52 @@ Thats the hard work done.
 
 ## Install this module with composer
 ```
-composer require drupal/search_api_elasticsearch_attachments
+composer require 'drupal/search_api_elasticsearch_attachments:6.x-dev'
 ```
+## Version Information (Important)
 
-## Elasticsearch Connector module (Alpha 1) compatibility.
-Alpha 1 version of Elasticsearch Connector module requires a number of patches.
-If you are using Alpha 1, please use 8.x-6.0-alpha1 of
+You have to choose the correct versions of the module depending on your
+Elastic Search Server setup. Please see the table below for
+compatibility.
+
+If you are using Elasticsearch Connector 8.x-6.0-alpha1, 
+please use 8.x-6.x-dev of
 *search_api_elasticsearch_attachments* module.
 
-This will auto install the *search_api_elasticsearch_attachments* module
-and also install the *elasticsearch_connector* module
+<table>
+  <tr>
+    <th>Search API Elasticsearch Attachments</th>
+    <th>Elasticsearch Connector</th>
+    <th>Elasticsearch Version</th>
+    <th>Attachment Plugin Support</th>
+  </tr>
+  <tr>
+    <td>8.x-1.x</td>
+    <td>8.x-5.x</td>
+    <td>5x</td>
+    <td>Mapper Attachments Plugin</td>
+  </tr>
+  <tr>
+    <td>8.x-5.x (todo)</td>
+    <td>8.x-5.x</td>
+    <td>5x</td>
+    <td>Ingest Attachment Processor Plugin</td>
+  </tr>
+  <tr>
+    <td>8.x-6.x</td>
+    <td>8.x-6.x</td>
+    <td>6x</td>
+    <td>Ingest Attachment Processor Plugin</td>
+  </tr>
+</table>
 
-There are a number of patches required to elasticsearch_connector module
-(Alpha 1 only). These are applied automatically by composer.
-Sit back and let composer do the hard work for you. Patches that will
+## Elasticsearch Connector module (8.x-6.0-alpha1) compatibility.
+8.x-6.0-alpha1 version of Elasticsearch Connector module requires a patch.
+These are applied automatically by composer.
+
+Sit back and let composer do the hard work for you. Following Patches that will
 get auto applied by composer:
-* Issue #2918138 by dakku: Support for alterParams()
+* Issue #2918138: Support for alterParams()
 
 ## Elasticsearch Attachments Configuration
 ### Enable and Configure the Elasticsearch Attachments Processor

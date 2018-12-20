@@ -3,7 +3,7 @@
 defaults: &defaults
   docker:
     # specify the version you desire here (avoid latest except for testing)
-    - image: dakku/drupal_tests:8.5-apache
+    - image: dakku/drupal_tests:latest
 
     # Use our fork until https://github.com/wernight/docker-phantomjs/pull/3 is
     # merged.

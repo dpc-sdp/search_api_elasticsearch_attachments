@@ -1,0 +1,25 @@
+plugin.plugin_configuration.search_api_processor.elasticsearch_attachments:
+  type: search_api.default_processor_configuration
+  mapping:
+    boost:
+      type: string
+    excluded_extensions:
+      type: string
+    max_filesize:
+      type: string
+    excluded_private:
+      type: boolean
+    excluded_mimes:
+      type: string
+
+plugin.plugin_configuration.search_api_processor.elasticsearch_attachments_highlight: 
+  type: search_api.default_processor_configuration
+  mapping:
+    highlight:
+      type: string
+    excerpt:
+      type: boolean
+    prefix:
+      type: string
+    suffix:
+      type: string

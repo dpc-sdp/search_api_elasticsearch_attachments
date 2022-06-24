@@ -4,6 +4,6 @@
     "type": "drupal-module",
     "minimum-stability": "dev",
     "require": {
-        "drupal/elasticsearch_connector": "^6.0"
+        "drupal/elasticsearch_connector": "^7.0"
     }
 }

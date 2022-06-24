@@ -34,7 +34,7 @@ class PrepareIndexMapping implements EventSubscriberInterface {
     if (!empty($processors['elasticsearch_attachments'])) {
       $indexMappingParams = $event->getIndexMappingParams();
       // Exclude our source encoded data field from getting saved in ES.
-      $indexMappingParams['body'][$indexMappingParams['type']]['_source']['excludes'][] = 'es_attachment.data';
+      $indexMappingParams['body']['_source']['excludes'][] = 'es_attachment.data';
       $event->setIndexMappingParams($indexMappingParams);
     }
   }

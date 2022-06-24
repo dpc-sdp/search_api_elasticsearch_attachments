@@ -158,6 +158,7 @@ class BuildIndexParams implements EventSubscriberInterface {
           'foreach' => [
             'field' => $this->targetFieldId,
             'ignore_failure' => TRUE,
+            'ignore_missing' => TRUE,
             'processor' => [
               'attachment' => [
                 'target_field' => '_ingest._value.attachment',

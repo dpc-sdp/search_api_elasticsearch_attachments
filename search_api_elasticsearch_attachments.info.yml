@@ -2,7 +2,7 @@ type: module
 name: 'Search API Elasticsearch Attachments'
 description: 'Extract and index file fields content to Elasticsearch.'
 core: '8.x'
-core_version_requirement: ^8 || ^9
+core_version_requirement: ^8 || ^9 || ^10
 package: Search
 dependencies:
  - search_api:search_api

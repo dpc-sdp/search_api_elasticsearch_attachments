@@ -2,6 +2,7 @@
 
 namespace Drupal\search_api_elasticsearch_attachments\Plugin\search_api\processor;
 
+use Symfony\Component\Mime\MimeTypeGuesserInterface;
 use Drupal\file\Entity\File;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
@@ -10,7 +11,6 @@ use Drupal\search_api\Processor\ProcessorProperty;
 use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\search_api\Plugin\PluginFormTrait;
-use Symfony\Component\HttpFoundation\File\MimeType\MimeTypeGuesserInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -84,7 +84,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   /**
    * The mime type guesser service.
    *
-   * @var \Drupal\Core\File\MimeType\MimeTypeGuesser
+   * @var \Symfony\Component\Mime\MimeTypeGuesserInterface
    */
   protected $mimeTypeGuesser;
 
@@ -105,7 +105,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, array $plugin_definition, MimeTypeGuesserInterface $mime_type_guesser, ConfigFactoryInterface $config_factory, KeyValueFactoryInterface $key_value) {
+  public function __construct(array $configuration, $plugin_id, array $plugin_definition, $mime_type_guesser, ConfigFactoryInterface $config_factory, KeyValueFactoryInterface $key_value) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->mimeTypeGuesser = $mime_type_guesser;
@@ -366,7 +366,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       }
       $excludedMimes = [];
       foreach ($extensions as $extension) {
-        $excludedMimes[] = $this->mimeTypeGuesser->guess('dummy.' . $extension);
+        $excludedMimes[] = $this->mimeTypeGuesser->guessMimeType('dummy.' . $extension);
       }
     }
     // Ensure we get an array of unique mime values because many extension can
@@ -521,7 +521,7 @@ class ElasticsearchAttachments extends ProcessorPluginBase implements PluginForm
       }
       else {
         $fileSizeBytes = $file->getSize();
-        $configuredSizeBytes = Bytes::toInt($configuredSize);
+        $configuredSizeBytes = Bytes::toNumber($configuredSize);
         if ($fileSizeBytes > $configuredSizeBytes) {
           return FALSE;
         }
